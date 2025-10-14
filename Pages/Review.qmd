@@ -42,6 +42,8 @@ plan(multisession, workers = 4)
 source('./Functions.R')
 ```
 
+The purpose of this page is to provide an understanding of the challenges associated with the data and to identify opportunities for data validation or cleaning. Therefore, we do not need to be concerned with evaluating every case.
+
 ## Raw Data Dictionary
 
 File name: `church_wide_form_071723.csv`\
@@ -69,9 +71,9 @@ Number of columns: 31
 - **2001 to 2021:** Create one column for each year from 2001 to 2021. Report `NA` for no response received and `1` for a response received.
 
 
-## Duplicate ABI's
+## Reduplicate ABI's
 
-Since ABIs are used to uniquely identify entries, we need to ensure that there are no duplicates.
+Since ABIs are used to uniquely identify entries, we need to ensure that there are no reduplicates.
 
 ```{r}
 #| eval: false
@@ -330,8 +332,118 @@ grid.arrange(p1, p2, nrow = 1)
 Typographical errors are most likely attributable to the last three combinations of assumptions. Fortunately, most entries appear to meet superficial expectations, but it is clear that more work is needed to validate the entries and ensure accuracy.
 
 
-## 
+## Closer Look at Assumptions #2
 
+Above, we showed that the set of assumptions with `LonLat_Similar, Zip_Same = TRUE` and `Metadata_Same = FALSE`, covering 20% of the data, could be associated with typographical errors in the metadata. Other occurrences with `Metadata_Same = FALSE` (assumptions #4, #6, and #7) are likely related to typographical errors not necessarily associated with the metadata fields.
+
+The metadata fields batched together included: `year_established`, `state`, `city`, `primary_naics_code`, and `naics8_descriptions.` All entries have `naics8_descriptions = "RELIGIOUS ORGANIZATIONS"`, so this variable will be ignored. Since states and cities are most likely associated together, we will focus on the more granular variable, `city`.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+
+# Load in the pre-produced test results for evaluation.
+result <- read_csv("Data/Results/KEEP LOCAL/From Explore the Raw Data/ABI Duplicates Test_05.16.2025.csv", 
+                   col_types = cols(...1 = col_skip())) %>% as.data.frame()
+
+subset_2 <- result[result$Zip_Same %in% TRUE & result$LonLat_Similar %in% TRUE & result$Metadata_Same %in% FALSE, ] %>%
+  `rownames<-`(NULL)
+
+search_space <- subset_2$abi
+
+# Add a progress bar to show where the function is in the for loop.
+pb = txtProgressBar(min = 0, max = length(search_space), style = 3)
+
+result2 <- NULL
+for(i in 1:length(search_space)) {
+  # Subset to show only the entries associated with one reduplicated ABI.
+  subset <- church_2[church_2$abi %in% search_space[i], ]
+
+  year_unique  <- length(unique(subset$year_established)) == 1
+  state_unique <- length(unique(subset$state)) == 1
+  city_unique  <- length(unique(subset$city)) == 1
+  naics_unique <- length(unique(subset$primary_naics_code)) == 1
+
+  result2 <- rbind(result2, cbind(search_space[i], year_unique, state_unique, city_unique, naics_unique))
+
+  # Print the for loop's progress.
+  setTxtProgressBar(pb, i)
+}
+# Commit result with reformatting.
+result2 <- result2 %>% as.data.frame() %>%
+  `colnames<-`(c("abi", "Year", "State", "City", "NAICS"))
+
+# Convert results from binary back to logical.
+result2[, -1] <- apply(result2[, -1], 2, function(x) as.logical(x))
+
+# Save the result.
+write.csv(result2, "Data/Results/KEEP LOCAL/From Explore the Raw Data/Metadata that Should Be the Same_05.18.2025.csv")
+```
+
+
+```{r}
+#| echo: false
+
+# Define the data for the counts table
+city_values <- c(FALSE, TRUE)
+naics_values <- c(FALSE, TRUE)
+year_values <- c(FALSE, TRUE)
+
+# Data for the counts table
+counts_data <- c(
+  359, 3490, 12926, 130819,  # Year Established = FALSE
+  694, 7360, 31922, 0       # Year Established = TRUE
+)
+
+# Data for the percentage table
+percentage_data <- c(
+  0.19, 1.86, 6.89, 69.74,  # Year Established = FALSE
+  0.37, 3.92, 17.02, 0.00   # Year Established = TRUE
+)
+
+# Assign dimension names
+dimnames <- list(
+  "City" = city_values,
+  "NAICS Code" = naics_values,
+  "Year Established" = year_values
+)
+
+# Create the arrays (tables)
+result_table_counts <- array(counts_data, dim = c(2, 2, 2), dimnames = dimnames)
+result_table_percents <- array(percentage_data, dim = c(2, 2, 2), dimnames = dimnames)
+```
+
+Below are summary tables showing whether a specific metadata field varied for a given unique ABI that satisfied the assumptions `LonLat_Similar, Zip_Same = TRUE` and `Metadata_Same = FALSE`:
+
+:::{.columns}
+::: {.column width="50%"}
+
+<u>ABI Counts with Varying Metadata</u>
+
+```{r}
+#| echo: false
+result_table_counts
+```
+
+::: 
+::: {.column width="50%"}
+
+<u>Percentages ABI with Varying Metadata</u>
+
+```{r}
+#| echo: false
+result_table_percents
+```
+
+::: 
+:::
+
+We see that most (about 70%) of the results only vary with the 'Year Established' reporting. This variable is not considered important, so its source of variation will not be further explored, only noted.
+
+::: {.callout-important}
+# THIS SECTION AND BELOW ARE IN PROGRESS
+:::
 
 ## PO Box's
 
@@ -416,7 +528,7 @@ ex2 <- data.frame(
   check.names = FALSE
 )
 
-ex1
+ex2
 ```
 
 
