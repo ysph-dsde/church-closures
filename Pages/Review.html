@@ -138,12 +138,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#raw-data-dictionary" id="toc-raw-data-dictionary" class="nav-link active" data-scroll-target="#raw-data-dictionary">Raw Data Dictionary</a></li>
-  <li><a href="#duplicate-abis" id="toc-duplicate-abis" class="nav-link" data-scroll-target="#duplicate-abis">Duplicate ABI’s</a>
+  <li><a href="#reduplicate-abis" id="toc-reduplicate-abis" class="nav-link" data-scroll-target="#reduplicate-abis">Reduplicate ABI’s</a>
   <ul class="collapse">
   <li><a href="#mutually-exclusive-dates" id="toc-mutually-exclusive-dates" class="nav-link" data-scroll-target="#mutually-exclusive-dates">Mutually Exclusive Dates</a></li>
   <li><a href="#moves-vs.-reduplications" id="toc-moves-vs.-reduplications" class="nav-link" data-scroll-target="#moves-vs.-reduplications">Moves vs.&nbsp;Reduplications</a></li>
   </ul></li>
-  <li><a href="#closer-look-at" id="toc-closer-look-at" class="nav-link" data-scroll-target="#closer-look-at">CLOSER LOOK AT</a></li>
+  <li><a href="#closer-look-at-assumptions-2" id="toc-closer-look-at-assumptions-2" class="nav-link" data-scroll-target="#closer-look-at-assumptions-2">Closer Look at Assumptions #2</a></li>
   <li><a href="#po-boxs" id="toc-po-boxs" class="nav-link" data-scroll-target="#po-boxs">PO Box’s</a></li>
   </ul>
 </nav>
@@ -170,6 +170,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<p>The purpose of this page is to provide an understanding of the challenges associated with the data and to identify opportunities for data validation or cleaning. Therefore, we do not need to be concerned with evaluating every case.</p>
 <section id="raw-data-dictionary" class="level2">
 <h2 class="anchored" data-anchor-id="raw-data-dictionary">Raw Data Dictionary</h2>
 <p>File name: <code>church_wide_form_071723.csv</code><br>
@@ -188,9 +189,9 @@ Number of columns: 31</p>
 <li><p><strong>2001 to 2021:</strong> Create one column for each year from 2001 to 2021. Report <code>NA</code> for no response received and <code>1</code> for a response received.</p></li>
 </ul>
 </section>
-<section id="duplicate-abis" class="level2">
-<h2 class="anchored" data-anchor-id="duplicate-abis">Duplicate ABI’s</h2>
-<p>Since ABIs are used to uniquely identify entries, we need to ensure that there are no duplicates.</p>
+<section id="reduplicate-abis" class="level2">
+<h2 class="anchored" data-anchor-id="reduplicate-abis">Reduplicate ABI’s</h2>
+<p>Since ABIs are used to uniquely identify entries, we need to ensure that there are no reduplicates.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">duplicated</span>(church_wide<span class="sc">$</span>abi) <span class="sc">%&gt;%</span> <span class="fu">table</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -353,15 +354,114 @@ Metadata FALSE  TRUE
 <p>Typographical errors are most likely attributable to the last three combinations of assumptions. Fortunately, most entries appear to meet superficial expectations, but it is clear that more work is needed to validate the entries and ensure accuracy.</p>
 </section>
 </section>
-<section id="closer-look-at" class="level2">
-<h2 class="anchored" data-anchor-id="closer-look-at">CLOSER LOOK AT</h2>
+<section id="closer-look-at-assumptions-2" class="level2">
+<h2 class="anchored" data-anchor-id="closer-look-at-assumptions-2">Closer Look at Assumptions #2</h2>
+<p>Above, we showed that the set of assumptions with <code>LonLat_Similar, Zip_Same = TRUE</code> and <code>Metadata_Same = FALSE</code>, covering 20% of the data, could be associated with typographical errors in the metadata. Other occurrences with <code>Metadata_Same = FALSE</code> (assumptions #4, #6, and #7) are likely related to typographical errors not necessarily associated with the metadata fields.</p>
+<p>The metadata fields batched together included: <code>year_established</code>, <code>state</code>, <code>city</code>, <code>primary_naics_code</code>, and <code>naics8_descriptions.</code> All entries have <code>naics8_descriptions = "RELIGIOUS ORGANIZATIONS"</code>, so this variable will be ignored. Since states and cities are most likely associated together, we will focus on the more granular variable, <code>city</code>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load in the pre-produced test results for evaluation.</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"Data/Results/KEEP LOCAL/From Explore the Raw Data/ABI Duplicates Test_05.16.2025.csv"</span>, </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">col_types =</span> <span class="fu">cols</span>(<span class="at">...1 =</span> <span class="fu">col_skip</span>())) <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>subset_2 <span class="ot">&lt;-</span> result[result<span class="sc">$</span>Zip_Same <span class="sc">%in%</span> <span class="cn">TRUE</span> <span class="sc">&amp;</span> result<span class="sc">$</span>LonLat_Similar <span class="sc">%in%</span> <span class="cn">TRUE</span> <span class="sc">&amp;</span> result<span class="sc">$</span>Metadata_Same <span class="sc">%in%</span> <span class="cn">FALSE</span>, ] <span class="sc">%&gt;%</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">rownames&lt;-</span><span class="st">`</span>(<span class="cn">NULL</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>search_space <span class="ot">&lt;-</span> subset_2<span class="sc">$</span>abi</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a progress bar to show where the function is in the for loop.</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>pb <span class="ot">=</span> <span class="fu">txtProgressBar</span>(<span class="at">min =</span> <span class="dv">0</span>, <span class="at">max =</span> <span class="fu">length</span>(search_space), <span class="at">style =</span> <span class="dv">3</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>result2 <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(search_space)) {</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Subset to show only the entries associated with one reduplicated ABI.</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  subset <span class="ot">&lt;-</span> church_2[church_2<span class="sc">$</span>abi <span class="sc">%in%</span> search_space[i], ]</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  year_unique  <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(subset<span class="sc">$</span>year_established)) <span class="sc">==</span> <span class="dv">1</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  state_unique <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(subset<span class="sc">$</span>state)) <span class="sc">==</span> <span class="dv">1</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  city_unique  <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(subset<span class="sc">$</span>city)) <span class="sc">==</span> <span class="dv">1</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  naics_unique <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(subset<span class="sc">$</span>primary_naics_code)) <span class="sc">==</span> <span class="dv">1</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  result2 <span class="ot">&lt;-</span> <span class="fu">rbind</span>(result2, <span class="fu">cbind</span>(search_space[i], year_unique, state_unique, city_unique, naics_unique))</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Print the for loop's progress.</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setTxtProgressBar</span>(pb, i)</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Commit result with reformatting.</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>result2 <span class="ot">&lt;-</span> result2 <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">colnames&lt;-</span><span class="st">`</span>(<span class="fu">c</span>(<span class="st">"abi"</span>, <span class="st">"Year"</span>, <span class="st">"State"</span>, <span class="st">"City"</span>, <span class="st">"NAICS"</span>))</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert results from binary back to logical.</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>result2[, <span class="sc">-</span><span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">apply</span>(result2[, <span class="sc">-</span><span class="dv">1</span>], <span class="dv">2</span>, <span class="cf">function</span>(x) <span class="fu">as.logical</span>(x))</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Save the result.</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(result2, <span class="st">"Data/Results/KEEP LOCAL/From Explore the Raw Data/Metadata that Should Be the Same_05.18.2025.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Below are summary tables showing whether a specific metadata field varied for a given unique ABI that satisfied the assumptions <code>LonLat_Similar, Zip_Same = TRUE</code> and <code>Metadata_Same = FALSE</code>:</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><u>ABI Counts with Varying Metadata</u></p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>, , Year Established = FALSE
+
+       NAICS Code
+City    FALSE   TRUE
+  FALSE   359  12926
+  TRUE   3490 130819
+
+, , Year Established = TRUE
+
+       NAICS Code
+City    FALSE  TRUE
+  FALSE   694 31922
+  TRUE   7360     0</code></pre>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<p><u>Percentages ABI with Varying Metadata</u></p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>, , Year Established = FALSE
+
+       NAICS Code
+City    FALSE  TRUE
+  FALSE  0.19  6.89
+  TRUE   1.86 69.74
+
+, , Year Established = TRUE
+
+       NAICS Code
+City    FALSE  TRUE
+  FALSE  0.37 17.02
+  TRUE   3.92  0.00</code></pre>
+</div>
+</div>
+</div>
+</div>
+<p>We see that most (about 70%) of the results only vary with the ‘Year Established’ reporting. This variable is not considered important, so its source of variation will not be further explored, only noted.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+THIS SECTION AND BELOW ARE IN PROGRESS
+</div>
+</div>
+<div class="callout-body-container callout-body">
+
+</div>
+</div>
 </section>
 <section id="po-boxs" class="level2">
 <h2 class="anchored" data-anchor-id="po-boxs">PO Box’s</h2>
 <p>The data processing summary provided by the team noted that all PO Boxes were removed prior to data processing. About 12% of all ABIs listed had at least one PO Box associated with an entry. As shown above, each row-wise entry associated with a given ABI supplies unique information. Therefore, we expect some skew to have been introduced due to this method.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>poBox_all <span class="ot">&lt;-</span> church_wide[<span class="fu">str_which</span>(church_wide<span class="sc">$</span>address_line_1, <span class="st">"(?i)PO Box|P O Box"</span>), ]</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">length</span>(<span class="fu">unique</span>(poBox_all<span class="sc">$</span>abi))<span class="sc">/</span><span class="fu">length</span>(<span class="fu">unique</span>(church_wide<span class="sc">$</span>abi))<span class="sc">*</span><span class="dv">100</span>, <span class="at">digits =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>poBox_all <span class="ot">&lt;-</span> church_wide[<span class="fu">str_which</span>(church_wide<span class="sc">$</span>address_line_1, <span class="st">"(?i)PO Box|P O Box"</span>), ]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">length</span>(<span class="fu">unique</span>(poBox_all<span class="sc">$</span>abi))<span class="sc">/</span><span class="fu">length</span>(<span class="fu">unique</span>(church_wide<span class="sc">$</span>abi))<span class="sc">*</span><span class="dv">100</span>, <span class="at">digits =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The full extent of the skew is not evaluated here. However, the following are two examples comparing the summary results produced using the previous method with the raw data.</p>
 <p><strong>Example #1:</strong></p>
@@ -391,19 +491,11 @@ Reported year last observed: 2015</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>        abi 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013
-1 10xxxxx91    1    1   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA
-2 10xxxxx91   NA   NA    1    1    1   NA   NA   NA   NA   NA   NA   NA   NA
-3 10xxxxx91   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA
-4 10xxxxx91   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA
-5 10xxxxx91   NA   NA   NA   NA   NA    1    1    1    1    1    1    1    1
-6 10xxxxx91   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA
+1 10xxxxx22   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA   NA
+2 10xxxxx22    1    1    1    1    1    1    1    1    1    1    1    1    1
   2014 2015 2016 2017 2018 2019 2020 2021
-1   NA   NA   NA   NA   NA   NA   NA   NA
-2   NA   NA   NA   NA   NA   NA   NA   NA
-3   NA   NA   NA   NA   NA    1    1    1
-4   NA   NA   NA    1   NA   NA   NA   NA
-5    1    1    1   NA   NA   NA   NA   NA
-6   NA   NA   NA   NA    1   NA   NA   NA</code></pre>
+1   NA    1   NA   NA   NA   NA   NA   NA
+2    1   NA   NA   NA   NA   NA   NA   NA</code></pre>
 </div>
 </div>
 
@@ -501,7 +593,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp('/' + window.location.host + '/');
+      var filterRegex = new RegExp("https:\/\/ysph-dsde\.github\.io\/church-closures\/");
     var isInternal = (href) => {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
