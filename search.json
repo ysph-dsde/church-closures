@@ -1,0 +1,23 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Church Closures Dashboard",
+    "section": "",
+    "text": "ImportantThis Site Has Been Archived and Moved"
+  },
+  {
+    "objectID": "index.html#overview",
+    "href": "index.html#overview",
+    "title": "Church Closures Dashboard",
+    "section": "Overview",
+    "text": "Overview\nThe Church Closure Dashboard is intended to dynamically display metrics describing church closures down to the tract level over user-provided date ranges. Users can then select regions to zoom-in on socioeconomic information about that area alongside these church closure metrics. Shelby Golden, MS was contracted to review the previously outlined data cleaning, validation, and harmonization methods employed by Dr. Insang Song; outline preparation steps implementing changes and improvements; and prepare metrics for the dashboard’s dynamic geospatial visualization.\nThis codebase includes a GitHub Pages website that summarizes and interprets findings, outlines suggested changes and limitations, and assesses algorithm performance. Scripts include detailed notes explaining what the code is doing and provide guidelines and steps to help subsequent analysts reproduce results or modify the process for improvements or other applications.\nProject PI: Professor Yusuf Ransome"
+  },
+  {
+    "objectID": "index.html#archival-details",
+    "href": "index.html#archival-details",
+    "title": "Church Closures Dashboard",
+    "section": "Archival Details",
+    "text": "Archival Details\nThis codebase was relocated to Professor Ransome’s SOCAH Lab GitHub Organization from the ysph-dsde GitHub Organization. At the time of relocation, not all scripts or report pages had been completed. As a result, while this repository has been archived, it is not intended for use. Refer to the new repository for the most current and complete version of this project.\nDates Active: June 2026 - April 29th, 2026\nNew Location: SOCAH-Lab/Church-Closures-Dashboard"
+  }
+]
