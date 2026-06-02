@@ -1,0 +1,38 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - "*.qmd"
+    - "!Local Only/"
+
+website:
+  title: "Church Closures Dashboard"
+  search: false
+  page-navigation: false
+  back-to-top-navigation: true
+  bread-crumbs: false
+  repo-url: https://github.com/ysph-dsde/church-closures
+  issue-url: https://github.com/ysph-dsde/church-closures/issues
+  repo-actions: [source, issue]
+  page-footer:
+    background: dark 
+    left: "This site was built on a ysph-dsde.github.io page. It was rendered using Quarto (v 1.6.39) and theme [Lux](https://bootswatch.com/lux/)." 
+    center: "This report was prepared by [Shelby Golden, M.S.](https://www.linkedin.com/in/shelby-golden/), a Data Scientist at YSPH DSDE."
+    right: 
+      - icon: globe
+        href: https://ysph.yale.edu/public-health-research-and-practice/research-centers-and-initiatives/public-health-data-science-and-data-equity/
+      - icon: github
+        href: https://github.com/ysph-dsde
+      - icon: linkedin
+        href: https://www.linkedin.com/showcase/public-health-data-science-and-data-equity-at-yale/
+      - icon: envelope 
+        href: mailto:admin.dsdeysph@yale.edu
+      - text: "(203) 737-8644"
+
+format:
+  html:
+    theme: lux
+    toc: true
+
+
+

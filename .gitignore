@@ -1,0 +1,48 @@
+# --------------------
+# General for R Projects
+
+.
+..
+.DS_Store
+.Rhistory
+.Rprofile
+.Rproj.user
+.httr-oauth
+.Ruserdata
+.RData
+
+# --------------------
+# Files and file types to ignore but are not sensitive
+
+/.quarto/
+/docs/
+/_site/
+sites_libs/
+**/*.pptx
+**/*.quarto_ipynb
+
+# --------------------
+# The location for all the sensitive data that is individual level
+
+Code/KEEP LOCAL/
+Data/Raw/KEEP LOCAL/
+Data/Results/KEEP LOCAL/
+
+# --------------------
+# Catch-all to ensure all KEEP LOCAL directories are ignored
+
+**/KEEP LOCAL/
+
+
+# --------------------
+# API Credentials
+
+# API credentials cannot be shared. Add them to the following environment
+# file located in the project root directory and ensure that git is
+# ignoring the file. You might need to make the file, as it is no always
+# created when an R project is initialized.
+#
+# Additional directions to creating and setting up the connection are
+# provided in scripts where an API key is loaded.
+
+.Renviron
